@@ -22,7 +22,6 @@ Your project follows a **Layered MVC (Model-View-Controller)** architecture. Thi
 
 ### 🟢 Root Files
 *   **`server.js`**: The entry point. It sets up the HTTP server on port 3000. It routes requests to `app.js`.
-*   **`cli-client.js`**: A separate, standalone script that acts as a "user" of your API. It uses `http` requests to talk to your running `server.js`. It's a bonus feature showing you can build client-side tools.
 *   **`package.json`**: Lists dependencies (`express`, `uuid`, etc.) and scripts (`npm run server`).
 
 ### 🟢 `src/` Directory (The Brains)

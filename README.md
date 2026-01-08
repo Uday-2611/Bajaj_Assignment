@@ -56,15 +56,7 @@ npm run server
 
 The server will start on `http://localhost:3000` with 15 pre-seeded instruments.
 
-### Optional: Interactive CLI Client
-
-For demonstration purposes, an interactive CLI client is provided:
-
-```bash
-npm start
-```
-
-This launches a menu-driven interface for testing API functionality.
+The server will start on `http://localhost:3000` with 15 pre-seeded instruments.
 
 ### Verification
 
@@ -319,7 +311,6 @@ src/
 └── app.js                    # Express application setup
 
 server.js                     # Server entry point
-cli-client.js                 # Interactive CLI client (optional)
 ```
 
 ## Assumptions
