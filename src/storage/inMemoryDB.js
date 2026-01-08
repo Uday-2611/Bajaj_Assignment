@@ -6,7 +6,7 @@ const trades = new Map();
 
 function seedInstruments() {
     const instrumentsData = [
-        
+
         {
             symbol: 'RELIANCE',
             exchange: EXCHANGES.NSE,
@@ -67,7 +67,7 @@ function seedInstruments() {
             instrumentType: INSTRUMENT_TYPES.EQUITY,
             lastTradedPrice: 3456.70
         },
-        
+
         {
             symbol: 'TATAMOTORS',
             exchange: EXCHANGES.BSE,
@@ -144,6 +144,10 @@ function updateOrder(orderId, updates) {
     return null;
 }
 
+function getAllOrders() {
+    return Array.from(orders.values());
+}
+
 function addTrade(trade) {
     trades.set(trade.tradeId, trade);
     return trade;
@@ -172,7 +176,7 @@ function getStats() {
 }
 
 module.exports = {
-    
+
     getAllInstruments,
     getInstrumentBySymbol,
     instrumentExists,
