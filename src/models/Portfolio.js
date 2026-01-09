@@ -3,12 +3,20 @@ class Portfolio {
         symbol,
         quantity,
         averagePrice,
-        currentValue
+        currentPrice = null,
+        investedValue = null,
+        currentValue,
+        unrealizedPnL = null,
+        pnlPercentage = null
     }) {
         this.symbol = symbol;
         this.quantity = quantity;
         this.averagePrice = averagePrice;
+        this.currentPrice = currentPrice;
+        this.investedValue = investedValue;
         this.currentValue = currentValue;
+        this.unrealizedPnL = unrealizedPnL;
+        this.pnlPercentage = pnlPercentage;
     }
 
     calculateCurrentValue(lastTradedPrice) {

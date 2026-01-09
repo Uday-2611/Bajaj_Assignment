@@ -6,7 +6,7 @@ const { instrumentExists, getInstrumentBySymbol } = require('./instrumentService
 
 function placeOrder(orderData) {
     try {
-        
+
         if (!instrumentExists(orderData.symbol)) {
             return {
                 success: false,
@@ -60,7 +60,7 @@ function placeOrder(orderData) {
 
 function executeMarketOrder(order) {
     try {
-        
+
         const instrumentResult = getInstrumentBySymbol(order.symbol);
 
         if (!instrumentResult.success) {
@@ -191,11 +191,45 @@ function cancelOrder(orderId, userId) {
     }
 }
 
+function executeLimitOrder(order, executedPrice) {
+    try {
+        // Update order status to EXECUTED
+        order.updateStatus(ORDER_STATUS.EXECUTED);
+        db.updateOrder(order.orderId, order);
+
+        // Create trade record
+        const trade = Trade.create({
+            orderId: order.orderId,
+            userId: order.userId,
+            symbol: order.symbol,
+            orderType: order.orderType,
+            quantity: order.quantity,
+            executedPrice: executedPrice
+        });
+
+        db.addTrade(trade);
+
+        return {
+            success: true,
+            order: order,
+            trade: trade
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+}
+
 module.exports = {
     placeOrder,
     getOrderById,
     getUserOrders,
     cancelOrder,
-    executeMarketOrder
+    executeMarketOrder,
+    executeLimitOrder
 };
+
 

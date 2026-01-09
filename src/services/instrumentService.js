@@ -43,9 +43,41 @@ function instrumentExists(symbol) {
     return db.instrumentExists(symbol);
 }
 
+function updateInstrumentPrice(symbol, newPrice) {
+    try {
+        if (!instrumentExists(symbol)) {
+            return {
+                success: false,
+                message: ERROR_MESSAGES.INSTRUMENT_NOT_FOUND
+            };
+        }
+
+        if (typeof newPrice !== 'number' || newPrice <= 0) {
+            return {
+                success: false,
+                message: 'Price must be a positive number'
+            };
+        }
+
+        const updatedInstrument = db.updateInstrumentPrice(symbol, newPrice);
+
+        return {
+            success: true,
+            data: updatedInstrument
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+}
+
 module.exports = {
     getAllInstruments,
     getInstrumentBySymbol,
-    instrumentExists
+    instrumentExists,
+    updateInstrumentPrice
 };
+
 

@@ -175,16 +175,34 @@ function getStats() {
     };
 }
 
+function updateInstrumentPrice(symbol, newPrice) {
+    const instrument = instruments.get(symbol);
+    if (instrument) {
+        instrument.lastTradedPrice = newPrice;
+        instruments.set(symbol, instrument);
+        return instrument;
+    }
+    return null;
+}
+
+function getPendingOrders() {
+    return Array.from(orders.values()).filter(order => order.status === 'PLACED');
+}
+
+
 module.exports = {
 
     getAllInstruments,
     getInstrumentBySymbol,
     instrumentExists,
+    updateInstrumentPrice,
 
     addOrder,
     getOrderById,
     getOrdersByUserId,
     updateOrder,
+    getAllOrders,
+    getPendingOrders,
 
     addTrade,
     getTradesByUserId,
@@ -193,3 +211,4 @@ module.exports = {
     clearAllData,
     getStats
 };
+

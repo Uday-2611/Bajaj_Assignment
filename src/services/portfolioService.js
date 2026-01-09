@@ -31,7 +31,7 @@ function getUserPortfolio(userId) {
             } else if (trade.orderType === ORDER_TYPES.SELL) {
                 holding.sellQuantity += trade.quantity;
                 holding.totalQuantity -= trade.quantity;
-                
+
                 const avgPrice = holding.totalInvestedValue / (holding.totalQuantity + trade.quantity);
                 holding.totalInvestedValue -= (trade.quantity * avgPrice);
             }
@@ -40,7 +40,7 @@ function getUserPortfolio(userId) {
         const portfolio = [];
 
         holdingsMap.forEach((holding, symbol) => {
-            
+
             if (holding.totalQuantity > 0) {
                 const averagePrice = holding.totalInvestedValue / holding.totalQuantity;
 
@@ -50,12 +50,23 @@ function getUserPortfolio(userId) {
                     : averagePrice;
 
                 const currentValue = holding.totalQuantity * currentPrice;
+                const investedValue = holding.totalInvestedValue;
+
+                // Calculate P&L
+                const unrealizedPnL = currentValue - investedValue;
+                const pnlPercentage = investedValue > 0
+                    ? ((unrealizedPnL / investedValue) * 100)
+                    : 0;
 
                 const portfolioItem = Portfolio.create({
                     symbol: symbol,
                     quantity: holding.totalQuantity,
                     averagePrice: parseFloat(averagePrice.toFixed(2)),
-                    currentValue: parseFloat(currentValue.toFixed(2))
+                    currentPrice: parseFloat(currentPrice.toFixed(2)),
+                    investedValue: parseFloat(investedValue.toFixed(2)),
+                    currentValue: parseFloat(currentValue.toFixed(2)),
+                    unrealizedPnL: parseFloat(unrealizedPnL.toFixed(2)),
+                    pnlPercentage: parseFloat(pnlPercentage.toFixed(2))
                 });
 
                 portfolio.push(portfolioItem);

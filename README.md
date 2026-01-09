@@ -16,11 +16,14 @@ This project implements a REST API wrapper SDK that simulates core trading workf
 
 ### Core Features
 
-- View available financial instruments
+- View available financial instruments with live price updates
+- **Live Market Simulation** with fluctuating stock prices (Random Walk Algorithm)
 - Place and manage orders (BUY/SELL with MARKET/LIMIT styles)
+- **Automatic LIMIT order execution** via matching engine
 - Track order status and execution
 - View trade history
-- Monitor portfolio holdings
+- Monitor portfolio holdings with **real-time P&L tracking**
+- Calculate profit/loss percentage for each holding
 
 ### Technical Stack
 
@@ -51,12 +54,13 @@ npm install
 
 3. Start the API server:
 ```bash
-npm run server
+npm start
 ```
 
-The server will start on `http://localhost:3000` with 15 pre-seeded instruments.
-
-The server will start on `http://localhost:3000` with 15 pre-seeded instruments.
+The server will start on `http://localhost:3000` with:
+- 15 pre-seeded instruments
+- **Live price simulation** (prices update every 5 seconds)
+- **Automatic matching engine** for LIMIT order execution
 
 ### Verification
 
@@ -86,6 +90,57 @@ The Swagger UI provides:
 - Interactive "Try it out" functionality to test endpoints directly in the browser
 - Request/response schemas and examples
 - No need to use curl or Postman for testing
+
+## Live Market Simulation
+
+### Fluctuating Stock Prices
+
+The server includes a **live market simulation** that automatically updates stock prices every **5 seconds** using a **Random Walk Algorithm**.
+
+**How it works:**
+- Each stock price changes by a random percentage between **-0.5% and +0.5%**
+- Formula: `newPrice = currentPrice × (1 + randomChange)`
+- Creates realistic market-like behavior with unpredictable price movements
+- All 15 instruments fluctuate independently
+
+**Console Output Example:**
+```
+Price Update (Random Walk):
+  UP   RELIANCE: Rs.2450.75 -> Rs.2463.21 (0.51%)
+  DOWN TCS: Rs.3680.50 -> Rs.3669.23 (-0.31%)
+  UP   INFY: Rs.1520.30 -> Rs.1527.45 (0.47%)
+```
+
+### Automatic LIMIT Order Execution
+
+The **matching engine** automatically executes LIMIT orders when market prices meet conditions:
+
+**Execution Rules:**
+- **BUY LIMIT**: Executes when `market price ≤ limit price`
+- **SELL LIMIT**: Executes when `market price ≥ limit price`
+- Orders execute at the **current market price** (not the limit price)
+- Matching engine runs every 5 seconds after price updates
+
+**Example:**
+1. Place a BUY LIMIT order for RELIANCE at Rs.2460
+2. When price drops to Rs.2455, order executes automatically
+3. Order status changes from PLACED → EXECUTED
+4. Trade record created at Rs.2455 (current market price)
+
+### Profit & Loss Tracking
+
+Portfolio endpoints now include **real-time P&L calculations**:
+
+- **unrealizedPnL**: Profit/loss amount in rupees
+- **pnlPercentage**: Profit/loss as a percentage
+- Updates automatically as prices fluctuate
+
+**Example:**
+- You bought 10 shares at Rs.2450.75 (invested Rs.24,507.50)
+- Current price: Rs.2463.21 (current value Rs.24,632.10)
+- **Unrealized P&L**: +Rs.124.60
+- **P&L Percentage**: +0.51% (you're up 0.51%!)
+
 
 ## API Documentation
 
@@ -237,7 +292,11 @@ Response:
       "symbol": "RELIANCE",
       "quantity": 10,
       "averagePrice": 2450.75,
-      "currentValue": 24507.50
+      "currentPrice": 2463.21,
+      "investedValue": 24507.50,
+      "currentValue": 24632.10,
+      "unrealizedPnL": 124.60,
+      "pnlPercentage": 0.51
     }
   ]
 }
@@ -246,7 +305,11 @@ Response:
 Portfolio Calculation:
 - `quantity`: Net quantity (BUY trades - SELL trades)
 - `averagePrice`: Weighted average purchase price
-- `currentValue`: quantity × current market price
+- `currentPrice`: Current market price (updates every 5 seconds)
+- `investedValue`: Total cost basis (quantity × averagePrice)
+- `currentValue`: Current market value (quantity × currentPrice)
+- `unrealizedPnL`: Profit/Loss amount (currentValue - investedValue)
+- `pnlPercentage`: P&L as percentage ((unrealizedPnL / investedValue) × 100)
 
 **GET /api/v1/portfolio/summary**
 
@@ -290,7 +353,9 @@ src/
 │   ├── instrumentService.js  # Instrument business logic
 │   ├── orderService.js       # Order processing and execution
 │   ├── tradeService.js       # Trade operations
-│   └── portfolioService.js   # Portfolio calculations
+│   ├── portfolioService.js   # Portfolio calculations with P&L tracking
+│   ├── priceSimulationService.js  # Price fluctuation (Random Walk)
+│   └── matchingEngine.js     # Automatic LIMIT order execution
 ├── controllers/
 │   ├── instrumentController.js
 │   ├── orderController.js
@@ -323,26 +388,29 @@ The following assumptions were made during implementation:
 
 3. **Order Execution Logic**:
    - MARKET orders execute immediately at the current `lastTradedPrice`
-   - LIMIT orders are placed in PLACED status but do not auto-execute
-   - No matching engine is implemented for LIMIT orders
+   - LIMIT orders are placed in PLACED status and **automatically execute via matching engine**
+   - Matching engine runs every 5 seconds to check pending LIMIT orders
+   - Orders execute when market price meets limit conditions
 
-4. **Instrument Data**: 15 Indian stock instruments (NSE and BSE) are pre-seeded with static prices. No live market data feed is integrated.
+4. **Price Simulation**: Stock prices fluctuate every 5 seconds using a random walk algorithm (±0.5% volatility). This simulates realistic market behavior without requiring live market data feeds.
 
-5. **Portfolio Calculation**: Portfolio holdings are calculated dynamically from trade history. Net quantity is computed as (total BUY quantity - total SELL quantity) per symbol.
+5. **Instrument Data**: 15 Indian stock instruments (NSE and BSE) are pre-seeded. Prices update dynamically via the price simulation service.
 
-6. **Validation Rules**:
+6. **Portfolio Calculation**: Portfolio holdings are calculated dynamically from trade history. Net quantity is computed as (total BUY quantity - total SELL quantity) per symbol. P&L metrics are calculated in real-time based on current market prices.
+
+7. **Validation Rules**:
    - Order quantity must be greater than 0
    - Price is mandatory for LIMIT orders
    - Symbol must exist in the instrument list
    - Only PLACED orders can be cancelled
 
-7. **Error Handling**: All errors return standardized JSON responses with appropriate HTTP status codes.
+8. **Error Handling**: All errors return standardized JSON responses with appropriate HTTP status codes.
 
-8. **Concurrency**: No handling for concurrent order placement. Production systems would implement locking mechanisms or use database transactions.
+9. **Concurrency**: No handling for concurrent order placement. Production systems would implement locking mechanisms or use database transactions.
 
-9. **API Versioning**: API is versioned at `/api/v1`. Future versions would use `/api/v2`, etc.
+10. **API Versioning**: API is versioned at `/api/v1`. Future versions would use `/api/v2`, etc.
 
-10. **User Isolation**: Single user system. Multi-user support would require proper user management and data isolation.
+11. **User Isolation**: Single user system. Multi-user support would require proper user management and data isolation.
 
 ## Assignment Compliance
 

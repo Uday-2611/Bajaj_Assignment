@@ -7,15 +7,7 @@ const options = {
         info: {
             title: 'Trading API SDK',
             version: '1.0.0',
-            description: 'RESTful API for trading platform with order management, portfolio tracking, and trade execution. This API provides endpoints for viewing instruments, placing orders, tracking trades, and managing portfolios.',
-            contact: {
-                name: 'Uday - Bajaj Broking',
-                email: 'uday@example.com'
-            },
-            license: {
-                name: 'MIT',
-                url: 'https://opensource.org/licenses/MIT'
-            }
+            description: 'RESTful API for trading platform with order management, portfolio tracking, and trade execution. This API provides endpoints for viewing instruments, placing orders, tracking trades, and managing portfolios.'
         },
         servers: [
             {
