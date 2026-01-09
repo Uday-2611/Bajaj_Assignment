@@ -3,10 +3,10 @@ const swaggerUi = require('swagger-ui-express');
 
 const options = {
     definition: {
-        openapi: '3.0.0',
+        
         info: {
             title: 'Trading API SDK',
-            version: '1.0.0',
+           
             description: 'RESTful API for trading platform with order management, portfolio tracking, and trade execution. This API provides endpoints for viewing instruments, placing orders, tracking trades, and managing portfolios.'
         },
         servers: [
